@@ -1,0 +1,10 @@
+        !COMPILER-GENERATED INTERFACE MODULE: Mon Jan 20 14:28:41 2014
+        MODULE DLAMC4__genmod
+          INTERFACE 
+            SUBROUTINE DLAMC4(EMIN,START,BASE)
+              INTEGER(KIND=4) :: EMIN
+              REAL(KIND=8) :: START
+              INTEGER(KIND=4) :: BASE
+            END SUBROUTINE DLAMC4
+          END INTERFACE 
+        END MODULE DLAMC4__genmod

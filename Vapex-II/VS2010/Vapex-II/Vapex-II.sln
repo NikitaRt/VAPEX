@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "Vapex-II", "Vapex-II.vfproj", "{12F4E5F0-D4F0-440C-AA26-48D1D3DF96EF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B2F77DB9-2B68-4D8B-A6C0-C720040DCC7C} = {B2F77DB9-2B68-4D8B-A6C0-C720040DCC7C}
+		{9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48} = {9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48}
+	EndProjectSection
+EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "blas", "..\blas\blas.vfproj", "{9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48}"
+EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "lapack", "..\lapack\lapack.vfproj", "{B2F77DB9-2B68-4D8B-A6C0-C720040DCC7C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48} = {9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12F4E5F0-D4F0-440C-AA26-48D1D3DF96EF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{12F4E5F0-D4F0-440C-AA26-48D1D3DF96EF}.Debug|Win32.Build.0 = Debug|Win32
+		{12F4E5F0-D4F0-440C-AA26-48D1D3DF96EF}.Release|Win32.ActiveCfg = Release|Win32
+		{12F4E5F0-D4F0-440C-AA26-48D1D3DF96EF}.Release|Win32.Build.0 = Release|Win32
+		{9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48}.Debug|Win32.Build.0 = Debug|Win32
+		{9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48}.Release|Win32.ActiveCfg = Release|Win32
+		{9F1DF9BA-6591-49EE-B92E-2B8DEDDEED48}.Release|Win32.Build.0 = Release|Win32
+		{B2F77DB9-2B68-4D8B-A6C0-C720040DCC7C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B2F77DB9-2B68-4D8B-A6C0-C720040DCC7C}.Debug|Win32.Build.0 = Debug|Win32
+		{B2F77DB9-2B68-4D8B-A6C0-C720040DCC7C}.Release|Win32.ActiveCfg = Release|Win32
+		{B2F77DB9-2B68-4D8B-A6C0-C720040DCC7C}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,841 @@
+!------------------------------------------------------------------!
+!  Input/Output operations                                         !
+!------------------------------------------------------------------!
+!  $Id: MOD_Inout2D.f90 10 2014-01-20 10:41:15Z Sergey $
+!------------------------------------------------------------------!
+MODULE INOUT_2D
+  IMPLICIT NONE
+  !--------------------------- Restart ----------------------
+  CHARACTER (len=80):: FileRST, FileCNT
+  INTEGER:: NREAD, NWRITE
+  !--------------------------- Output -----------------------
+  INTEGER:: MsgLevel, FileMsgLevel
+  INTEGER,PARAMETER:: MLOGFILE = 16
+  !
+  INTEGER:: isPDB, isPDBDisp
+  DOUBLE PRECISION:: dtPDB, dtPDBDisp
+  DOUBLE PRECISION:: timePDB, timePDBDisp
+  INTEGER:: NPictPDB, NPictPDBDisp
+
+  INTEGER:: isTEC, isTECDisp
+  DOUBLE PRECISION:: dtTEC, dtTECDisp
+  DOUBLE PRECISION:: timeTEC, timeTECDisp
+  INTEGER:: NPictTEC, NPictTECDisp
+
+  INTEGER:: isOUT
+  DOUBLE PRECISION:: timeOUT,dtOUT
+
+  DOUBLE PRECISION:: PScale, EnergyScale
+
+CONTAINS
+
+  SUBROUTINE WriteRestart
+    USE GLOBALS
+    USE SOLVER_2D
+    USE VARIABLES_2D
+    USE DISPERSED_PHASE
+    USE PROBLEM_DATA
+    IMPLICIT NONE
+
+    OPEN(9,file=TRIM(ADJUSTL(FileCNT)), form='unformatted',err=2000)
+    WRITE(9,err=2000) time
+    WRITE(9,err=2000) NPictPDB,timePDB,NPictPDBDisp,timePDBDisp
+    WRITE(9,err=2000) NPictTEC,timeTEC,NPictTECDisp,timeTECDisp
+    WRITE(9,err=2000) timeOUT
+    WRITE(9,err=2000) au1,av1,at1
+    WRITE(9,err=2000) au2,av2,at2,aa2
+    WRITE(9,err=2000) bp,bpa
+    WRITE(9,err=2000) aYH2
+
+    IF(isDispersedPhase /= 0) THEN
+       WRITE(9,err=2000) al3
+       WRITE(9,err=2000) time_disp,ncount_frag
+       WRITE(9,err=2000) ll,lid,llj            ! Droplets
+       IF(ll > 0) THEN
+          WRITE(9,err=2000) x(1:ll)
+          WRITE(9,err=2000) z(1:ll)
+          WRITE(9,err=2000) xu3(1:ll)
+          WRITE(9,err=2000) xv3(1:ll)
+          WRITE(9,err=2000) xt3(1:ll)
+          WRITE(9,err=2000) xd3(1:ll)
+          WRITE(9,err=2000) qmk(1:ll)
+          WRITE(9,err=2000) ind(1:ll)
+          WRITE(9,err=2000) we(1:ll)
+          WRITE(9,err=2000) sai(1:ll)
+          WRITE(9,err=2000) epf(1:ll)
+          WRITE(9,err=2000) dMFrag(1:ll)
+          WRITE(9,err=2000) FRateLocal
+       ENDIF
+    ENDIF
+
+    WRITE(9,err=2000) qmp1,qmp2,pot2,qqq31
+    WRITE(9,err=2000) qgam, qgamH2, quenchEnergy, qeWater, qeVapour
+    WRITE(9,err=2000) qmpart,qmjet,qmdrops,qmdebris,qmzero
+    WRITE(9,err=2000) FragMass
+    WRITE(9,err=2000) ar2FB, araFB, apFB, ae2FB,apaFB, at1FB, at2FB, aYH2FB,arH2FB
+    WRITE(9,err=2000) amas10, amas20,amasH2O_0,amasAr_0,amasH2_0
+    WRITE(9,err=2000) ener10, ener20, ener30, enermix0
+    WRITE(9,err=2000) enerd, enerd1, enerd2
+    WRITE(9,err=2000) amasH2O_total0,amasAr_total0,amasH2_total0
+
+    CLOSE(9,status='keep')
+    RETURN
+2000 CONTINUE
+    PRINT *,'Error writing file ',TRIM(ADJUSTL(FileCNT))
+    STOP
+
+  END SUBROUTINE WriteRestart
+
+  SUBROUTINE ReadRestart
+    USE GLOBALS
+    !    use SOLVER_2D
+    USE VARIABLES_2D
+    USE DISPERSED_PHASE
+    USE PROBLEM_DATA
+    IMPLICIT NONE
+
+    OPEN(9,file=TRIM(ADJUSTL(FileRST)), form='unformatted',err=2000)
+    READ(9,END=2000,err=2000) time
+    READ(9,END=2000,err=2000) NPictPDB,timePDB,NPictPDBDisp,timePDBDisp
+    READ(9,END=2000,err=2000) NPictTEC,timeTEC,NPictTECDisp,timeTECDisp
+    READ(9,END=2000,err=2000) timeOUT
+    READ(9,END=2000,err=2000) au1,av1,at1
+    READ(9,END=2000,err=2000) au2,av2,at2,aa2
+    READ(9,END=2000,err=2000) bp,bpa
+    READ(9,END=2000,err=2000) aYH2
+
+    IF(isDispersedPhase /= 0) THEN
+       READ(9,END=2000,err=2000) al3
+       READ(9,END=2000,err=2000) time_disp,ncount_frag
+       READ(9,END=2000,err=2000) ll,lid,llj! Droplets
+       IF(ll > 0) THEN
+          READ(9,END=2000,err=2000) x(1:ll)
+          READ(9,END=2000,err=2000) z(1:ll)
+          READ(9,END=2000,err=2000) xu3(1:ll)
+          READ(9,END=2000,err=2000) xv3(1:ll)
+          READ(9,END=2000,err=2000) xt3(1:ll)
+          READ(9,END=2000,err=2000) xd3(1:ll)
+          READ(9,END=2000,err=2000) qmk(1:ll)
+          READ(9,END=2000,err=2000) ind(1:ll)
+          READ(9,END=2000,err=2000) we(1:ll)
+          READ(9,END=2000,err=2000) sai(1:ll)
+          READ(9,END=2000,err=2000) epf(1:ll)
+          READ(9,END=2000,err=2000) dMFrag(1:ll)
+          READ(9,END=2000,err=2000) FRateLocal
+       ENDIF
+    ENDIF
+
+    READ(9,END=2000,err=2000) qmp1,qmp2,pot2,qqq31
+    READ(9,END=2000,err=2000) qgam, qgamH2, quenchEnergy, qeWater, qeVapour
+    READ(9,END=2000,err=2000) qmpart,qmjet,qmdrops,qmdebris,qmzero
+    READ(9,END=2000,err=2000) FragMass
+    READ(9,END=2000,err=2000) ar2FB, araFB, apFB, ae2FB,apaFB, at1FB, at2FB, aYH2FB,arH2FB
+    READ(9,END=2000,err=2000) amas10, amas20,amasH2O_0,amasAr_0,amasH2_0
+    READ(9,END=2000,err=2000) ener10, ener20, ener30, enermix0
+    READ(9,END=2000,err=2000) enerd, enerd1, enerd2
+    READ(9,END=2000,err=2000) amasH2O_total0,amasAr_total0,amasH2_total0
+
+    CLOSE(9,status='keep')
+    RETURN
+2000 CONTINUE
+    PRINT *,'Error reading file ',TRIM(ADJUSTL(FileRST))
+    STOP
+  END SUBROUTINE ReadRestart
+
+
+  SUBROUTINE Salute(MFILE)
+    IMPLICIT NONE
+    INTEGER,INTENT(in),OPTIONAL:: MFILE
+    INTEGER:: unit
+    IF(PRESENT(MFILE)) THEN
+       unit = MFILE
+    ELSE
+       unit = 6
+    ENDIF
+
+    WRITE(unit,1000)
+1000 FORMAT(80('#') &
+         &     // &
+         &     13x,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'/ &
+         &     13x,'@             Electrogorsk Research and              @'/ &
+         &     13x,'@             Engineering Center (EREC)              @'/ &
+         &     13x,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'/&
+         &     13x,'@                                                    @'/&
+         &     13x,'@         #     #                                    @'/&
+         &     13x,'@         #     #  ###  ####   ###  #    #           @'/&
+         &     13x,'@         #     #     # #   # #   #  #  #            @'/&
+         &     13x,'@          #   #   #### ####  ####    ##             @'/&
+         &     13x,'@           # #   #   # #     #      #  #            @'/&
+         &     13x,'@            #     #### #      ###  #    #           @'/&
+         &     13x,'@                                                    @'/&
+         &     13x,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'/&
+         &     13x,'@                 Version 1.0 /2014                  @'/&
+         &     13x,'@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'&
+         &     //80('#'))
+  END SUBROUTINE salute
+
+
+  SUBROUTINE ReadInputData
+    USE GLOBALS
+    USE GLOBALS_2D
+    USE VARIABLES_2D
+    USE SOLVER_2D
+    USE GRID_2D
+    USE PROBLEM_DATA
+    USE DISPERSED_PHASE
+    USE HYDROGEN
+    IMPLICIT NONE
+    CHARACTER(len=80) buf
+    INTEGER:: pos 
+
+    LOGICAL EXISTS
+
+    ERR_READING = ""
+
+    INQUIRE(file = TRIM(ADJUSTL(FilePAR)), exist = EXISTS)
+    IF(.NOT.EXISTS) THEN
+       CALL Salute
+       WRITE(*,444) TRIM(ADJUSTL(FilePAR))
+       STOP
+    ENDIF
+
+    OPEN(unit = UNITREP,file=FileRep)
+    OPEN(unit = UNITPAR,file=FilePAR,form='formatted', status ='old')
+
+    CALL Salute(UNITREP)
+    WRITE(UNITREP,*) 'опнвхрюм бундмни мюанп хг тюикю ', FilePAR
+
+    IF(.NOT.ReadRestart()) GOTO 2000
+
+    IF(.NOT.ReadOutput()) GOTO 2000    
+
+    IF(.NOT.ReadRun()) GOTO 2000
+
+    IF(.NOT.ReadApproach()) GOTO 2000
+
+    IF(.NOT.ReadGrid()) GOTO 2000
+
+    IF(.NOT.ReadFreeboard()) GOTO 2000
+
+    IF(.NOT.ReadCoolant()) GOTO 2000
+
+    IF(.NOT.ReadNonCondGas()) GOTO 2000
+
+    IF(.NOT.ReadDispPhase()) GOTO 2000
+
+    IF(.NOT.ReadFragmentation()) GOTO 2000
+
+    IF(.NOT.ReadTransducers()) GOTO 2000
+
+    CLOSE(UNITPAR)
+    RETURN
+
+2000 CONTINUE
+    PRINT *,'Error reading file ', TRIM(ADJUSTL(FilePAR))
+    CLOSE(UNITPAR)
+    STOP    
+
+444 FORMAT(1x,'Unable to open file ',a)     
+
+  CONTAINS
+
+    LOGICAL FUNCTION ReadRestart()
+
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/RESTART/  NREAD, FileRST, NWRITE, FileCNT
+
+      TRACE_LINE = "ReadRestart"
+
+      NREAD=0
+      FileRST="VAPEX.RST"
+      NWRITE=1
+      FileCNT="VAPEX_RST.LST"
+
+      ReadRestart = .TRUE.
+      REWIND(UNITPAR)
+
+      READ(UNITPAR,NML=RESTART, END = 7000, err= 2000)
+
+7000  CONTINUE
+
+      IF (NREAD > 0) THEN
+         INQUIRE(file = TRIM(ADJUSTL(FileRST)), exist = EXISTS)
+         IF(.NOT.EXISTS) THEN
+            WRITE(UNITREP,*) 'ме мюидем тюик пеярюпрю ', FileRST
+            STOP
+         ELSE
+            WRITE(UNITREP,*) 'опнвхрюм тюик пеярюпрю ', FileRST
+         ENDIF
+      ELSEIF (NREAD==0) THEN 
+         WRITE(UNITREP,*) 'пюяв╗р гюдюм аег хяонкэгнбюмхъ тюикю пеярюпрю '
+      ENDIF
+
+      RETURN
+2000  CONTINUE
+      ReadRestart = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &RESTART:'
+      WRITE(UNITREP,*) ERR_READING    
+
+    END FUNCTION ReadRestart
+
+    LOGICAL FUNCTION ReadOutput()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/OUTPUT/  MsgLevel, FileMsgLevel, isOUT, dtOUT, isPDB, dtPDB, isPDBDisp, &
+           dtPDBDisp, isTEC, dtTec, isTECDisp, dtTECDisp, PScale, EnergyScale
+
+      TRACE_LINE = "ReadOutput"
+      ReadOutput = .TRUE.
+      REWIND(UNITPAR)
+
+      MsgLevel=0
+      FileMsgLevel=0
+      isOUT=0
+      dtOUT=0
+      isPDB=0
+      dtPDB=0
+      isPDBDisp=0
+      dtPDBDisp=0
+      isTEC=0
+      dtTec=0
+      isTECDisp=0
+      dtTECDisp=0
+      PScale=1
+      EnergyScale=1
+
+      READ(UNITPAR,NML=OUTPUT, END = 7000, err= 2000)
+7000  CONTINUE
+      RETURN
+2000  CONTINUE
+      ReadOutput = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &OUTPUT:'
+      WRITE(UNITREP,*) ERR_READING  
+
+    END FUNCTION ReadOutput
+
+    LOGICAL FUNCTION ReadRun()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/RUN/  NOuter, NInner, TimeMax,  tstepmax, tstepinit, &
+           cflmax, MaxNonLinear, TolNonLinear, TestName
+
+      TRACE_LINE = "ReadRun"
+      ReadRun = .TRUE.
+      REWIND(UNITPAR)
+
+      NOuter =        100
+      NInner =        100
+      TimeMax =       UNASSIGNED
+      tstepmax =       1.D-4
+      tstepinit =     1.D-4
+      cflmax =        0.9D0
+      !MaxNonLinear =  UNASSIGNED
+      !TolNonLinear =  UNASSIGNED
+
+      READ(UNITPAR,NML=RUN, END = 7000, err= 2000)
+7000  CONTINUE
+      IF (NOuter < 0) ERR_READING='менаундхлн ббеярх онкнфхрекэмне вхякн бмеьмху жхйкнб NOuter'
+      IF (NInner < 0) ERR_READING='менаундхлн ббеярх онкнфхрекэмне вхякн бмсрпеммху жхйкнб NInner'
+      IF (TimeMax <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ бпелъ яв╗рю дкъ гюдювх TimeMax"
+      IF ((TimeMax > IFASSIGNED).AND.(TimeMax <= 0)) ERR_READING = "менаундхлн гюдюрэ онкнфхрекэмне бпелъ яв╗рю дкъ гюдювх TimeMax"
+      tstepinit = MAX(MIN(tstepinit,tstepmax),tstepmin)
+
+      IF (LEN_TRIM(ERR_READING) > 0) GOTO 2000
+
+      WRITE(UNITREP,*) 'вхякн бмеьмху жхйкнб NOuter = ', NOuter
+      WRITE(UNITREP,*) 'вхякн бмсрпеммху жхйкнб NInner = ', NInner
+      WRITE(UNITREP,*) 'хяонкэгсеряъ гмювемхе люйяхлюкэмн пюяв╗рмнцн ьюцю tstepmax = ', tstepmax
+
+
+      RETURN
+2000  CONTINUE
+      ReadRun = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &RUN:'
+      WRITE(UNITREP,*) ERR_READING      
+
+    END FUNCTION ReadRun
+
+    LOGICAL FUNCTION ReadApproach()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/APPROACH/  isEvaporation, isDispersedPhase, Gravity, allim
+
+      TRACE_LINE = "ReadApproach"
+      ReadApproach = .TRUE.
+      REWIND(UNITPAR)
+
+      isEvaporation = 1
+      isDispersedPhase = 1
+      gravity = 9.80665D0
+      allim = 1.d-6
+
+      READ(UNITPAR,NML=APPROACH, END = 7000, err= 2000)
+7000  CONTINUE
+
+      IF (isEvaporation < 0) ERR_READING='медносярхлне гмювемхе оюпюлерпю isEvaporation (0 хкх 1)'
+      IF (isDispersedPhase < 0) ERR_READING='медносярхлне гмювемхе оюпюлерпю isDispersedPhase (0 хкх 1)'
+      IF (gravity < 0) ERR_READING='нрпхжюрекэмне гмювемхе сяйнпемхъ ябнандмнцн оюдемхъ gravity'
+      IF (allim < 0) ERR_READING='нрпхжюрекэмне гмювемхе лхмхлюкэмнцн гмювемхъ наз╗лмни днкх оюпю'
+
+      IF (LEN_TRIM(ERR_READING) > 0) GOTO 2000
+
+      IF (DABS(gravity-9.81) > 0.1) WRITE(UNITREP,*) 'сяйнпемхе ябнандмнцн оюдемхъ нркхвмн нр гмювемхъ он слнквюмхч', gravity
+
+      RETURN
+2000  CONTINUE
+      ReadApproach = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &APPROACH:'
+      WRITE(UNITREP,*) ERR_READING      
+
+    END FUNCTION ReadApproach
+
+    LOGICAL FUNCTION ReadGrid()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/GRID/  n, m, VesselRad, VesselHeight, WaterLevel, isOpenSide, HOpening0, HOpening, isOpenTop
+
+      TRACE_LINE = "ReadGrid"
+      ReadGrid = .TRUE.
+      REWIND(UNITPAR)
+
+      n =             UNASSIGNED_INT
+      m =             UNASSIGNED_INT
+      VesselRad =     UNASSIGNED
+      VesselHeight =  UNASSIGNED
+      WaterLevel =    UNASSIGNED 
+      isOpenSide =    UNASSIGNED_INT
+      HOpening0 =     UNASSIGNED
+      isOpenTop =     UNASSIGNED_INT    
+
+      READ(UNITPAR,NML=GRID, END = 7000, err= 2000)
+7000  CONTINUE
+      IF (n == UNASSIGNED_INT) ERR_READING = "менаундхлн ббеярх йнкхвеярбн ъвеей б пюдхюкэмнл мюопюбкемхх n"
+      IF (m == UNASSIGNED_INT) ERR_READING = "менаундхлн ббеярх йнкхвеярбн ъвеей б юйяхюкэмнл мюопюбкемхх m"
+      IF (VesselRad <= IFASSIGNED) ERR_READING = "менаундхлн ббеярх пюдхся янясдю VesselRad"
+      IF (VesselHeight <= UNASSIGNED_INT) ERR_READING = "менаундхлн ббеярх бшянрс янясдю VesselHeight"
+      IF (WaterLevel <= UNASSIGNED_INT) ERR_READING = "менаундхлн ббеярх спнбемэ фхдйнярх б янясде WaterLevel"    
+      IF (isOpenSide == UNASSIGNED_INT) ERR_READING = "менаундхлн ббеярх опхгмюй нрйпшрхъ цс яанйс isOpenSide (1 хкх 0)"
+      IF (HOpening0 == IFASSIGNED) ERR_READING = "менаундхлн ббеярх йнкхвеярбн ъвеей б цпюмхвмнл сякнбхх HOpening0"
+      IF (isOpenTop == UNASSIGNED_INT) ERR_READING = "менаундхлн ббеярх опхгмюй нрйпшрхъ цс ябепус isOpenTop (1 хкх 0)"
+
+      IF (WaterLevel > VesselHeight) ERR_READING = "спнбемэ бндш б янясде гюдюм анкэье бшянрш янясдю"    
+
+      IF (LEN_TRIM(ERR_READING) > 0) GOTO 2000
+
+      n9 = n+1;  m9 = m+1
+
+      RETURN
+
+2000  CONTINUE
+      ReadGrid = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &GRID:'
+      WRITE(UNITREP,*) ERR_READING
+
+    END FUNCTION ReadGrid
+
+    LOGICAL FUNCTION ReadFreeBoard()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/FREEBOARD/ VolumeFB, TempFB_0
+
+      TRACE_LINE = "ReadFreeBoard"
+      ReadFreeBoard = .TRUE.
+      REWIND(UNITPAR)
+
+      VolumeFB = UNASSIGNED
+      TempFB_0 = UNASSIGNED
+
+      READ(UNITPAR,NML=FREEBOARD, END = 7000, err= 2000)
+7000  CONTINUE
+      IF (VolumeFB < 0) ERR_READING = "менаундхлн гюдюрэ наз╗л ябнандмнцн спнбмъ VolumeFB >= 0"
+      IF (TempFB_0 < 0) ERR_READING = "менаундхлн гюдюрэ релоепюрспс цюгю б ябнандмнл спнбме TempFB_0 >= 0"
+
+      IF (LEN_TRIM(ERR_READING) > 0) GOTO 2000
+
+      RETURN
+2000  CONTINUE
+      ReadFreeBoard = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &FREEBOARD:'
+      WRITE(UNITREP,*) ERR_READING      
+
+    END FUNCTION ReadFreeBoard
+
+    LOGICAL FUNCTION ReadCoolant()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/COOLANT/ P0, TLiq0, TGas0, Alpha_0, isSodium, isWater
+
+      TRACE_LINE = "ReadCoolant"
+      ReadCoolant = .TRUE.
+      REWIND(UNITPAR)
+
+      P0 =        UNASSIGNED
+      TLiq0 =     UNASSIGNED
+      TGas0 =     UNASSIGNED
+      Alpha_0 =   UNASSIGNED
+      isSodium =  UNASSIGNED_INT
+      isWater =   UNASSIGNED_INT
+
+      READ(UNITPAR,NML=COOLANT, END = 7000, err= 2000)
+7000  CONTINUE
+      IF (P0 <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ дюбкемхе нукюдхрекъ P0"
+      IF (TLiq0 <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ релоепюрспс фхдйнярх нукюдхрекъ TLiq0"
+      IF (TGas0 <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ релоепюрспс цюгю нукюдхрекъ TGas0"
+      IF (Alpha_0 <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ наз╗лмсч днкч цюгю Alpha_0"
+      IF (isSodium.AND.isWater) ERR_READING = "лнфмн хяонкэгнбюрэ рнкэйн ндхр рхо нукюдхрекъ"
+      IF (((.NOT.isSodium).AND.(.NOT.isWater)).OR.((isSodium==UNASSIGNED_INT).AND.(isWater==UNASSIGNED_INT))) ERR_READING = "менаундхлн гюдюрэ рхо нукюдхрекъ isWater=1 ХКХ isSodium=1"
+
+      IF (LEN_TRIM(ERR_READING) > 0) GOTO 2000
+
+      RETURN
+2000  CONTINUE
+      ReadCoolant = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &COOLANT:'
+      WRITE(UNITREP,*) ERR_READING
+
+    END FUNCTION ReadCoolant
+
+    LOGICAL FUNCTION ReadNonCondGas()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/NONCONDGAS/ nonCondGasType, isMixtureWithH2, isHydrogenRelease, C_H2, T_H2
+
+      TRACE_LINE = "ReadNonCondGas"
+      ReadNonCondGas = .TRUE.
+      REWIND(UNITPAR)
+
+      nonCondGasType = UNASSIGNED_INT
+      isMixtureWithH2 = UNASSIGNED_INT
+      isHydrogenRelease = UNASSIGNED_INT
+      C_H2 = UNASSIGNED
+      T_H2 = UNASSIGNED
+
+
+      READ(UNITPAR,NML=NONCONDGAS, END = 7000, err= 2000)
+7000  CONTINUE
+      IF (nonCondGasType == UNASSIGNED_INT) ERR_READING = "менаундхлн гюдюрэ рхо мейнмдемяхпселнцн цюгю nonCondGasType = 1-Air,2-H2,3-He,4-Ar"
+      !if (isMixtureWithH2 == UNASSIGNED_INT) ERR_READING = "менаундхлн бшапюрэ ножхч дкъ isMixtureWithH2" CHECK
+      IF (C_H2 <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ йнмярюмрс дкъ лндекх цемепюжхх бнднпндю C_H2"
+      IF (T_H2 <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ релоепюрспс дкъ цемепхпселнцн бнднпндю T_H2"
+
+      IF (LEN_TRIM(ERR_READING) > 0) GOTO 2000    
+
+      RETURN
+2000  CONTINUE
+      ReadNonCondGas = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &NONCONDGAS:'
+      WRITE(UNITREP,*) ERR_READING    
+
+    END FUNCTION ReadNonCondGas
+
+    LOGICAL FUNCTION ReadDispPhase()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/DISPPHASE/ tstep_disp, HRelease, Diam, isUseVin, Vin, Tin, Din, VDropMin, rmelt, cmelt, qmpart0, nump, nump_in, debrisHeight
+
+      TRACE_LINE = "ReadDispPhase"
+      ReadDispPhase = .TRUE.
+      REWIND(UNITPAR)
+
+      isUseVin =      UNASSIGNED_INT
+      tstep_disp =    UNASSIGNED
+      HRelease =      UNASSIGNED
+      Diam =          UNASSIGNED
+      VDropMin =      UNASSIGNED
+      rmelt =         UNASSIGNED
+      cmelt =         UNASSIGNED
+      qmpart0 =       UNASSIGNED
+      nump =          UNASSIGNED_INT
+      nump_in =       UNASSIGNED_INT
+      debrisHeight =  UNASSIGNED
+      Vin =           UNASSIGNED
+      Tin =           UNASSIGNED
+      Din =           UNASSIGNED
+
+
+      READ(UNITPAR,NML=DISPPHASE, END = 7000, err= 2000)
+7000  CONTINUE
+
+      IF (isUseVin == UNASSIGNED_INT) ERR_READING = "хяонкэгнбюрэ кх мювюкэмсч яйнпнярэ вюярхж isUseVin"
+      IF (tstep_disp <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ вюярнрс тпюцлемрюжхх tstep_disp"
+      IF (HRelease <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ бшянрс ондювх пюяокюбю HRelease"
+      IF (Diam <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ дхюлерп ярпсх пюяокюбю Diam"
+      IF (VDropMin <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ лхмхлюкэмсч яйнпнярэ тпюцлемрхпнбюммшу вюярхж VDropMin"
+      IF (rmelt <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ окнрмнярэ йнпхслю rmelt"
+      IF (cmelt <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ реокн╗лйнярэ йнпхслю cmelt"
+      IF (qmpart0 <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ люяяс йнпхслю qmpart0"
+      IF (nump == UNASSIGNED_INT) ERR_READING = "менаундхлн гюдюрэ вхякн тпюцлемрнб nump"
+      IF (nump_in == UNASSIGNED_INT) ERR_READING = "менаундхлн гюдюрэ вхякн тпюцлемрнб nump_in"
+      IF (debrisHeight <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ бшянрс якнъ деапхяю debrisHeight"
+      IF (Vin <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ яйнпнярэ вюярхж Vin"
+      IF (Tin <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ релоепюрспс вюярхж Tin"
+      IF (Din <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ дхюлерп вюярхж Din"
+
+      IF (LEN_TRIM(ERR_READING) > 0) GOTO 2000
+
+      RETURN
+2000  CONTINUE
+      ReadDispPhase = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &DISPPHASE:'
+      WRITE(UNITREP,*) ERR_READING      
+
+    END FUNCTION ReadDispPhase
+
+    LOGICAL FUNCTION ReadFragmentation()
+      USE Globals
+      IMPLICIT NONE
+
+      NAMELIST/FRAGMENTATION/ nskip_frag, nfrag, Ddrop, fragL_D, dropConeAngle
+
+      TRACE_LINE = "ReadFragmentation"
+      ReadFragmentation = .TRUE.
+      REWIND(UNITPAR)
+
+      nskip_frag =    UNASSIGNED_INT
+      nfrag =         UNASSIGNED_INT
+      Ddrop =         UNASSIGNED  
+      fragL_D =       UNASSIGNED
+      dropConeAngle = UNASSIGNED
+
+      READ(UNITPAR,NML=FRAGMENTATION, END = 7000, err= 2000)
+7000  CONTINUE
+
+      IF (nskip_frag == UNASSIGNED_INT) ERR_READING = "менаундхлн гюдюрэ вюярнрс тпюцлемрюжхх nskip_frag"
+      IF (nfrag == UNASSIGNED_INT) ERR_READING = "менаундхлн гюдюрэ яйнкэйн тпюцлемрнб напюгсеряъ гю ндхм ьюц nfrag"
+      IF (Ddrop <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ дхюлерп тпюцлемрнб Ddrop"
+      IF (dropConeAngle <= IFASSIGNED) ERR_READING = "менаундхлн гюдюрэ сцнк dropConeAngle"
+
+      IF (LEN_TRIM(ERR_READING) > 0) GOTO 2000
+
+      IF (fragL_D <= 0) WRITE(UNITREP,*) 'хяонкэгсеряъ йнппекъжхъ яюхрн дкъ дкхмш онкмнцн пюяоюдю ярпсх'
+
+
+      RETURN
+2000  CONTINUE
+      ReadFragmentation = .FALSE.
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &FRAGMENTATION:'
+      WRITE(UNITREP,*) ERR_READING       
+
+    END FUNCTION ReadFragmentation
+
+
+
+    LOGICAL FUNCTION ReadTransducers()
+      USE OUTTRANS
+      IMPLICIT NONE
+
+      CHARACTER(len=256):: Name
+      CHARACTER(len=256):: ControlParameter
+      REAL(kind=8):: Coord(2)
+      INTEGER:: Ind(2)
+      INTEGER:: iTR
+      INTEGER:: Storage
+
+      NAMELIST/TRANSDUCER/ Name, ControlParameter, Coord, Ind, Storage
+
+      TRACE_LINE = "ReadTransducers"
+      ReadTransducers = .TRUE.
+      NTrans=0
+
+      REWIND(UNITPAR)
+
+      DO
+         READ(UNITPAR,NML=TRANSDUCER, END = 100, err= 2000)
+         NTrans = NTrans+1
+      ENDDO
+
+100   CONTINUE
+
+      IF(NTrans > 0) THEN
+         !
+         ! Do actual reading
+         !
+         ALLOCATE(Trans(NTrans))
+         REWIND(UNITPAR)
+         DO iTR = 1, NTrans
+            Name = ""; ControlParameter = ""; Coord(:) = UNASSIGNED; Ind(:) = -1
+            Storage = - 1
+            READ(UNITPAR,NML=TRANSDUCER, END = 2000, err= 2000)
+            IF(LEN_TRIM(ControlParameter) <= 0) GOTO 2000
+            IF(LEN_TRIM(Name) <= 0) Name = ControlParameter
+            Trans(iTR)%Name = Name
+            Trans(iTR)%ControlParameter = ControlParameter
+            Trans(iTR)%Coord = Coord
+            Trans(iTR)%Ind = Ind
+            Trans(ITR)%TimeDep = Storage
+            SELECT CASE(Trans(iTR)%ControlParameter)
+            CASE("MLiq","MGas","MDisp","MJet","MDrops","MDebris","TStep","CFL","TLiq","TVap","TSat","TDisp","P","ULiq","UVap","VLiq","VVap","eLiq","eVap",&
+                 "PhiLiq","PhiVap","PhiDisp","PhiJet","PhiDroplets","PhiDebris")
+            CASE default
+               ERR_READING = "оПНБЕПЭРЕ ОПЮБХКЭМНЯРЭ МЮОХЯЮМХЪ ЙНМРПНКЭМНЦН ГМЮВЕМХЪ ДЮРВХЙЮ "
+               GOTO 2000
+            END SELECT
+         ENDDO
+         Trans(1:NTrans)%Active = .FALSE.   
+      ENDIF
+      IS_WRITE_TRANS = IS_WRITE_TRANS .AND. NTrans > 0
+      RETURN
+2000  CONTINUE
+      WRITE(UNITREP,*) 'ньхайю б пюгдеке &TRANSDUCER:'
+      WRITE(UNITREP,*) ERR_READING
+      WRITE(UNITREP,*) Trans(iTR)%Name
+      ReadTransducers = .FALSE.
+      IS_WRITE_TRANS = .FALSE.
+    END FUNCTION ReadTransducers
+
+  END SUBROUTINE ReadInputData
+
+
+
+
+  !==================================================================================================== OLDIES
+  SUBROUTINE ReadInputData_old
+    USE GLOBALS
+    USE GLOBALS_2D
+    USE VARIABLES_2D
+    USE SOLVER_2D
+    USE GRID_2D
+    USE PROBLEM_DATA
+    USE DISPERSED_PHASE
+    USE HYDROGEN
+    IMPLICIT NONE
+    CHARACTER(len=80) buf
+    INTEGER:: pos
+
+
+    OPEN(5,file='vapex.inp',status='old', &
+         access='sequential',form='formatted',err=2000)
+
+    READ(5,*, END = 2000, err = 2000)
+    READ(5,'(a)', END = 2000, err = 2000) TestName
+
+    READ(5,*)!------------------------------------ RESTART -----------------!
+    READ(5,*, END = 2000, err = 2000) NREAD !  0 - Initial, 1 - Read        !
+    READ(5,'(a20)', END = 2000, err = 2000) FileRST !  Initial Data Filename!
+    READ(5,*, END = 2000, err = 2000) NWRITE !  0 - No, 1 - Yes             !
+    READ(5,'(a20)', END = 2000, err = 2000) FileCNT !  File for Writing Data!
+    ! Truncate filenames
+    buf=ADJUSTL(FileRST); pos = SCAN(buf,' !')
+    buf(pos:LEN(buf)) = ' '
+    FileRST = TRIM(buf)
+    !
+    buf=ADJUSTL(FileCNT); pos = SCAN(buf,' !')
+    buf(pos:LEN(buf)) = ' '
+    FileCNT = TRIM(buf)
+
+    READ(5,*, END = 2000, err = 2000) ! Loop counters
+    READ(5,*, END = 2000, err = 2000) NOuter ! Internal loop counter
+    READ(5,*, END = 2000, err = 2000) NInner ! External loop counter
+    READ(5,*, END = 2000, err = 2000) TimeMax ! Maximum time
+
+    READ(5,*, END = 2000, err = 2000) ! Run data
+    READ(5,*, END = 2000, err = 2000) tstepmax
+    READ(5,*, END = 2000, err = 2000) tstepmin
+    READ(5,*, END = 2000, err = 2000) cflmax
+    READ(5,*, END = 2000, err = 2000) MaxNonLinear
+    READ(5,*, END = 2000, err = 2000) TolNonLinear
+
+    READ(5,*, END = 2000, err = 2000) ! Output of results
+    READ(5,*, END = 2000, err = 2000) MsgLevel
+    READ(5,*, END = 2000, err = 2000) FileMsgLevel
+
+    READ(5,*, END = 2000, err = 2000) isOUT
+    READ(5,*, END = 2000, err = 2000) dtOUT
+
+    READ(5,*, END = 2000, err = 2000) isPDB
+    READ(5,*, END = 2000, err = 2000) dtPDB
+    READ(5,*, END = 2000, err = 2000) isPDBDisp
+    READ(5,*, END = 2000, err = 2000) dtPDBDisp
+
+    READ(5,*, END = 2000, err = 2000) isTEC
+    READ(5,*, END = 2000, err = 2000) dtTEC
+    READ(5,*, END = 2000, err = 2000) isTECDisp
+    READ(5,*, END = 2000, err = 2000) dtTECDisp
+    READ(5,*, END = 2000, err = 2000) ! Scales for output
+    READ(5,*, END = 2000, err = 2000) PScale
+    READ(5,*, END = 2000, err = 2000) EnergyScale
+
+    READ(5,*, END = 2000, err = 2000)   ! Computational grid
+    READ(5,*, END = 2000, err = 2000) n ! Grid size in r
+    READ(5,*, END = 2000, err = 2000) m ! and z directions
+    n9 = n+1;  m9 = m+1
+
+    READ(5,*, END = 2000, err = 2000) !------- Vessel geometry -------------!
+    READ(5,*, END = 2000, err = 2000) VesselRad   ! Vessel horizontal size
+    READ(5,*, END = 2000, err = 2000) VesselHeight! Vessel vertical size
+    READ(5,*, END = 2000, err = 2000) WaterLevel  ! Water level
+    READ(5,*, END = 2000, err = 2000) isOpenSide  ! 0/1
+    READ(5,*, END = 2000, err = 2000) HOpening0   ! 
+    READ(5,*, END = 2000, err = 2000) HOpening    !
+    READ(5,*, END = 2000, err = 2000) isOpenTop   ! 0/1
+
+    IF(isOpenTop /= 0) isOpenSide = 0
+
+    WaterLevel = MIN(WaterLevel,VesselHeight)
+    HFreeSpace = VesselHeight - WaterLevel
+
+    READ(5,*, END = 2000, err = 2000) !-------------- Freeboard ------------!
+    READ(5,*, END = 2000, err = 2000) VolumeFB ! Freeboard volume
+    READ(5,*, END = 2000, err = 2000) TempFB_0 ! Freeboard temperature
+
+    READ(5,*, END = 2000, err = 2000)
+    READ(5,*, END = 2000, err = 2000) P0       ! Initial pressure
+    READ(5,*, END = 2000, err = 2000) TLiq0    ! Initial temperature of liquid
+    READ(5,*, END = 2000, err = 2000) TGas0    ! Initial temperature ov vapour
+    READ(5,*, END = 2000, err = 2000) Gravity  ! Gravity acceleration
+    READ(5,*, END = 2000, err = 2000) Alpha_0  ! Initial gas contents in liquid
+
+    READ(5,*, END = 2000, err = 2000) !--------- Non-condensable gas -------!
+    READ(5,*, END = 2000, err = 2000) nonCondGasType  ! 1-Air,2-H2,3-He,4-Ar
+    READ(5,*, END = 2000, err = 2000) isMixtureWithH2 ! if 1, mixture with H2
+    READ(5,*, END = 2000, err = 2000) isHydrogenRelease ! 0/1
+    READ(5,*, END = 2000, err = 2000) C_H2 ! Constant in hydrogen generation model
+    READ(5,*, END = 2000, err = 2000) T_H2 ! Temperature of the released hydrogen
+
+    READ(5,*, END = 2000, err = 2000) !------ Evaporation/Condensation -----!
+    READ(5,*, END = 2000, err = 2000) isEvaporation ! 0/1
+
+    READ(5,*, END = 2000, err = 2000) !------- Lagrangian particles ---------!    
+    READ(5,*, END = 2000, err = 2000) isDispersedPhase
+    READ(5,*, END = 2000, err = 2000) tstep_disp 
+    READ(5,*, END = 2000, err = 2000) HRelease ! Melt release height
+    READ(5,*, END = 2000, err = 2000) Diam ! Inlet diameter
+    READ(5,*, END = 2000, err = 2000) isUseVin !(0/1)
+    READ(5,*, END = 2000, err = 2000) Vin ! Inlet velocity
+    READ(5,*, END = 2000, err = 2000) Tin ! Inlet temperature
+    READ(5,*, END = 2000, err = 2000) Din ! Diameter of jet particles leaving nozzle
+    READ(5,*, END = 2000, err = 2000) rmelt ! Melt density
+    READ(5,*, END = 2000, err = 2000) cmelt ! Melt heat capacity
+    READ(5,*, END = 2000, err = 2000) qmpart0 ! Total mass of melt released
+    READ(5,*, END = 2000, err = 2000) nump ! Number of particles
+    READ(5,*, END = 2000, err = 2000) nump_in ! Number of inlet melt macroparticles
+    READ(5,*, END = 2000, err = 2000) debrisHeight  ! Height of debris layer
+    READ(5,*, END = 2000, err = 2000) VdropMin
+
+    READ(5,*, END = 2000, err = 2000) ! Fragmentation
+    READ(5,*, END = 2000, err = 2000) nskip_frag
+    READ(5,*, END = 2000, err = 2000) nfrag !Particles (ind=2) created by fragmentation
+    READ(5,*, END = 2000, err = 2000) Ddrop ! Diameter of droplets (ind=2)
+    READ(5,*, END = 2000, err = 2000) fragL_D ! fixed L/D, if <0 then Saito correlation is used
+    READ(5,*, END = 2000, err = 2000) dropConeAngle ! tg(Ud/Vd) after fragmentation  
+
+    CLOSE(5)
+    GOTO 1000
+2000 CONTINUE
+    WRITE(*,*) '***** Error Reading vapex.inp ! *****' !
+    CLOSE(5)
+    STOP
+1000 CONTINUE
+
+  END SUBROUTINE ReadInputData_old
+END MODULE INOUT_2D

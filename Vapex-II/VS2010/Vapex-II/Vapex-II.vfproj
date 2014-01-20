@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{12F4E5F0-D4F0-440C-AA26-48D1D3DF96EF}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebug" UseMkl="mklSequential"/>
+				<Tool Name="VFLinkerTool" OutputFile="..\..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="9999999"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="..\..\src\MOD_Conv2D.f90"/>
+		<File RelativePath="..\..\src\MOD_Correl.f90"/>
+		<File RelativePath="..\..\src\MOD_Disp.f90"/>
+		<File RelativePath="..\..\src\MOD_Disp2D.f90"/>
+		<File RelativePath="..\..\src\MOD_Elleq.f90"/>
+		<File RelativePath="..\..\src\MOD_EqCoefs.f90"/>
+		<File RelativePath="..\..\src\MOD_Evapor.f90"/>
+		<File RelativePath="..\..\src\MOD_Globals.f90"/>
+		<File RelativePath="..\..\src\MOD_Graphics2D.f90"/>
+		<File RelativePath="..\..\src\MOD_Hydrogen.f90"/>
+		<File RelativePath="..\..\src\MOD_Initial2D.f90"/>
+		<File RelativePath="..\..\src\MOD_Inout2D.f90"/>
+		<File RelativePath="..\..\src\MOD_outTrans.f90"/>
+		<File RelativePath="..\..\src\MOD_Solver2D.f90"/>
+		<File RelativePath="..\..\src\MOD_Variables2D.f90"/>
+		<File RelativePath="..\..\src\MOD_Velocity2D.f90"/>
+		<File RelativePath="..\..\src\MOD_WaterProps.f90"/>
+		<File RelativePath="..\..\src\Problem2D.f90"/>
+		<File RelativePath="..\..\src\Vapex-II.f90"/></Filter></Files>
+	<Globals/></VisualStudioProject>

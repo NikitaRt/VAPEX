@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectType="typeStaticLibrary" ProjectCreator="Intel Fortran" Keyword="Static Library" Version="11.0" ProjectIdGuid="{B2F77DB9-2B68-4D8B-A6C0-C720040DCC7C}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLibrarianTool" OutputFile="..\..\lib/$(ProjectName).lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Release|Win32" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFLibrarianTool"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="..\..\lapack\dgebak.f"/>
+		<File RelativePath="..\..\lapack\dgebal.f"/>
+		<File RelativePath="..\..\lapack\dgeev.f"/>
+		<File RelativePath="..\..\lapack\dgehd2.f"/>
+		<File RelativePath="..\..\lapack\dgehrd.f"/>
+		<File RelativePath="..\..\lapack\dgesv.f"/>
+		<File RelativePath="..\..\lapack\dgetf2.f"/>
+		<File RelativePath="..\..\lapack\dgetrf.f"/>
+		<File RelativePath="..\..\lapack\dgetrs.f"/>
+		<File RelativePath="..\..\lapack\dhseqr.f"/>
+		<File RelativePath="..\..\lapack\dlabad.f"/>
+		<File RelativePath="..\..\lapack\dlacpy.f"/>
+		<File RelativePath="..\..\lapack\dladiv.f"/>
+		<File RelativePath="..\..\lapack\dlaexc.f"/>
+		<File RelativePath="..\..\lapack\dlahqr.f"/>
+		<File RelativePath="..\..\lapack\dlahrd.f"/>
+		<File RelativePath="..\..\lapack\dlaln2.f"/>
+		<File RelativePath="..\..\lapack\dlamch.f"/>
+		<File RelativePath="..\..\lapack\dlange.f"/>
+		<File RelativePath="..\..\lapack\dlanhs.f"/>
+		<File RelativePath="..\..\lapack\dlanv2.f"/>
+		<File RelativePath="..\..\lapack\dlapy2.f"/>
+		<File RelativePath="..\..\lapack\dlarf.f"/>
+		<File RelativePath="..\..\lapack\dlarfb.f"/>
+		<File RelativePath="..\..\lapack\dlarfg.f"/>
+		<File RelativePath="..\..\lapack\dlarft.f"/>
+		<File RelativePath="..\..\lapack\dlarfx.f"/>
+		<File RelativePath="..\..\lapack\dlartg.f"/>
+		<File RelativePath="..\..\lapack\dlascl.f"/>
+		<File RelativePath="..\..\lapack\dlaset.f"/>
+		<File RelativePath="..\..\lapack\dlassq.f"/>
+		<File RelativePath="..\..\lapack\dlaswp.f"/>
+		<File RelativePath="..\..\lapack\dlasy2.f"/>
+		<File RelativePath="..\..\lapack\dorg2r.f"/>
+		<File RelativePath="..\..\lapack\dorghr.f"/>
+		<File RelativePath="..\..\lapack\dorgqr.f"/>
+		<File RelativePath="..\..\lapack\dtrevc.f"/>
+		<File RelativePath="..\..\lapack\dtrexc.f"/>
+		<File RelativePath="..\..\lapack\ilaenv.f"/></Filter></Files>
+	<Globals/></VisualStudioProject>

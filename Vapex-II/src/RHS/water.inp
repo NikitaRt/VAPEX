@@ -1,0 +1,26 @@
+  1.476D-6 Alpha
+  403.3D0  T1
+  399.D0  T2
+  4.44364e5 P
+  1.87914e5 Pa
+  4   igastype (1-air,2-H2,3-He,4-Ar)
+  0   isMixture with H2 (0/1)
+  0.0D0   YH2 (initial hydrogen mass fraction)
+  1.D-2 tstepmax
+  1.d-9 tstepmin
+  2.0   ts_factor
+  5    nsteps_ts
+  300 nsteps
+  10000 NIter
+  1.D-6 Tol_NL
+  1 isPhaseChange
+  0 isGasAddition
+  1.D0 Gamma_a
+  0.2D0 YH2_Gamma_a 
+  800.D0 TH2_Gamma_a
+  1 isThirdPhase
+  0.324 Alpha_3
+  3000.D0 T3
+  1.D4  dR31dA
+  0 2.D4  dR32dA
+
